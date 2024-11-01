@@ -50,7 +50,7 @@ def handle_query_submission(query: str):
 
 
 def main():
-    st.title("Search Application")
+    st.title("Search GPT")
 
     initialize_session_state()
 

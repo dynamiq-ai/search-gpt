@@ -1,15 +1,12 @@
 import re
 
 from dynamiq import Workflow
-from dynamiq.callbacks import TracingCallbackHandler
 from dynamiq.connections import OpenAI as OpenAIConnection
 from dynamiq.connections import ScaleSerp
 from dynamiq.flows import Flow
-from dynamiq.nodes import InputTransformer
 from dynamiq.nodes.agents.simple import SimpleAgent
 from dynamiq.nodes.llms.openai import OpenAI
 from dynamiq.nodes.tools.scale_serp import ScaleSerpTool
-from dynamiq.runnables import RunnableConfig
 from dynamiq.utils.logger import logger
 
 
@@ -78,7 +75,6 @@ Remember to focus on accuracy, clarity, and proper citation in your response.
 If there are errors with the query or you are unable to craft a response, provide polite feedback within the <answer> tags.
 Explain that you are not able to find the answer and provide some suggestions for the user to improve the query.
 """  # noqa E501
-
 # Setup models
 llm_mini = OpenAI(
     name="OpenAI LLM Mini",
@@ -103,32 +99,31 @@ agent_query_rephraser = SimpleAgent(
     llm=llm_mini,
 )
 
-search_tool = ScaleSerpTool(
-    name="search_tool",
-    id="search_tool",
-    connection=ScaleSerp(params={"location": "USA, United Kingdom, Europe"}),
-    limit=5,
-    is_optimized_for_agents=True,
-).depends_on(agent_query_rephraser)
-search_tool.input_transformer = InputTransformer(selector={"input": "$[agent_query_rephraser].output.content"})
-
-agent_answer_synthesizer = SimpleAgent(
-    id="agent_answer_synthesizer",
-    name="agent_answer_synthesizer",
-    role=AGENT_ANSWER_ROLE,
-    llm=llm,
-).depends_on([search_tool, agent_query_rephraser])
-agent_answer_synthesizer._prompt_variables.update({"search_results": "{search_results}", "user_query": "{user_query}"})
-agent_answer_synthesizer.input_transformer = InputTransformer(
-    selector={
-        "input": "",
-        "search_results": "$[search_tool].output.content",
-        "user_query": "$[agent_query_rephraser].output.content",
-    }
+search_tool = (
+    ScaleSerpTool(
+        name="search_tool",
+        id="search_tool",
+        connection=ScaleSerp(params={"location": "USA, United Kingdom, Europe"}),
+        limit=5,
+        is_optimized_for_agents=True,
+    )
+    .inputs(input=agent_query_rephraser.outputs.content)
+    .depends_on(agent_query_rephraser)
 )
 
-tracing = TracingCallbackHandler()
-wf = Workflow(flow=Flow(nodes=[agent_query_rephraser, search_tool, agent_answer_synthesizer]), callbacks=[tracing])
+agent_answer_synthesizer = (
+    SimpleAgent(
+        id="agent_answer_synthesizer",
+        name="agent_answer_synthesizer",
+        role=AGENT_ANSWER_ROLE,
+        llm=llm,
+    )
+    .inputs(search_results=search_tool.outputs.content, user_query=agent_query_rephraser.outputs.content)
+    .depends_on([search_tool, agent_query_rephraser])
+)
+agent_answer_synthesizer._prompt_variables.update({"search_results": "{search_results}", "user_query": "{user_query}"})
+
+wf = Workflow(flow=Flow(nodes=[agent_query_rephraser, search_tool, agent_answer_synthesizer]))
 
 
 def process_query(query: str):
@@ -144,7 +139,7 @@ def process_query(query: str):
     """
     try:
         # Run the workflow with the provided query
-        result = wf.run(input_data={"input": query}, config=RunnableConfig(callbacks=[tracing]))
+        result = wf.run(input_data={"input": query}, config=None)
 
         output_content = result.output[agent_answer_synthesizer.id]["output"].get("content")
         logger.info(f"Workflow result: {output_content}")
