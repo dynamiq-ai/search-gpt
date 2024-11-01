@@ -1,5 +1,5 @@
 import re
-
+import os
 from dynamiq import Workflow
 from dynamiq.connections import OpenAI as OpenAIConnection
 from dynamiq.connections import ScaleSerp
@@ -8,6 +8,9 @@ from dynamiq.nodes.agents.simple import SimpleAgent
 from dynamiq.nodes.llms.openai import OpenAI
 from dynamiq.nodes.tools.scale_serp import ScaleSerpTool
 from dynamiq.utils.logger import logger
+
+openai_api_key = os.getenv("OPENAI_API_KEY")
+scale_serp_api_key = os.getenv("SERP_API_KEY")
 
 
 def extract_tag_content(text, tag):
@@ -78,14 +81,14 @@ Explain that you are not able to find the answer and provide some suggestions fo
 # Setup models
 llm_mini = OpenAI(
     name="OpenAI LLM Mini",
-    connection=OpenAIConnection(),
+    connection=OpenAIConnection(api_key=openai_api_key),
     model="gpt-4o-mini",
     temperature=0.1,
     max_tokens=3000,
 )
 llm = OpenAI(
     name="OpenAI LLM",
-    connection=OpenAIConnection(),
+    connection=OpenAIConnection(api_key=openai_api_key),
     model="gpt-4o",
     temperature=0.1,
     max_tokens=4000,
@@ -103,7 +106,7 @@ search_tool = (
     ScaleSerpTool(
         name="search_tool",
         id="search_tool",
-        connection=ScaleSerp(params={"location": "USA, United Kingdom, Europe"}),
+        connection=ScaleSerp(api_key=scale_serp_api_key, params={"location": "USA, United Kingdom, Europe"}),
         limit=5,
         is_optimized_for_agents=True,
     )

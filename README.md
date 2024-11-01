@@ -72,7 +72,7 @@ Make sure your `.env` file contains:
 - `DYNAMIQ_ENDPOINT`: The endpoint for the Dynamiq API.
 - `DYNAMIQ_API_KEY`: API key for the Dynamiq platform.
 - `SERP_API_KEY`: API key for Scale SERP to fetch search results.
-
+- `OPENAI_API_KEY`: API key for OpenAI.
 The application will read these variables to authenticate and connect to the necessary external services.
 
 ## Usage
