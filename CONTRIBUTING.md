@@ -31,11 +31,11 @@ Good documentation is key to a successful project. If you find areas in our docu
 
 ### Contributing Code
 
-1. **Fork the Repository:** Fork the [repository](https://github.com/dynamiq-ai/dynamiq) to your own GitHub account.
+1. **Fork the Repository:** Fork the [repository](https://github.com/dynamiq-ai/search-gpt) to your own GitHub account.
 
 2. **Clone the Fork:** Clone your fork to your local machine:
    ```sh
-   git clone https://github.com/YOUR-USERNAME/dynamiq
+   git clone https://github.com/yourusername/search-gpt.git
    ```
 
 3. Create a virtaul environment and install project requirements:
@@ -54,20 +54,14 @@ Good documentation is key to a successful project. If you find areas in our docu
 
 7. **Commit Changes:** Commit your changes with a descriptive commit message:
    ```sh
-   git commit -m "Description of the feature or fix"
+   git commit -m "feat: add new feature"
    ```
-
-8. Make sure you run tests before pushing your changes:
-   ```sh
-   make prepare test
-   ```
-
-9. **Push to Fork:** Push your changes to your forked repository:
+   
+8. **Push to Fork:** Push your changes to your forked repository:
    ```sh
    git push origin feature-name
    ```
-
-10. **Open a Pull Request:** Open a pull request from your fork to the main repository. Include a detailed description of your changes and any related issues.
+9. **Open a Pull Request:** Open a pull request from your fork to the main repository. Include a detailed description of your changes and any related issues.
 
 ## Code Style
 
