@@ -99,7 +99,7 @@ The application will be accessible at [http://localhost:8501](http://localhost:8
 To build the Docker image, make sure you are in the project directory and run:
 
 ```bash
-docker build -t search_gpt_app .
+docker build -t search-gpt .
 ```
 
 ### Run Docker Container
@@ -107,7 +107,7 @@ docker build -t search_gpt_app .
 Run the Docker container, ensuring it loads the `.env` file:
 
 ```bash
-docker run --rm --env-file .env -p 8501:8501 search_gpt_app
+docker run --rm --env-file .env -p 8501:8501 search-gpt
 ```
 
 This command:
