@@ -1,5 +1,6 @@
-import re
 import os
+import re
+
 from dynamiq import Workflow
 from dynamiq.connections import OpenAI as OpenAIConnection
 from dynamiq.connections import ScaleSerp
@@ -11,6 +12,7 @@ from dynamiq.utils.logger import logger
 
 openai_api_key = os.getenv("OPENAI_API_KEY")
 scale_serp_api_key = os.getenv("SERP_API_KEY")
+logger.info(f"OpenAI API Key: {openai_api_key}")
 
 
 def extract_tag_content(text, tag):
@@ -106,7 +108,10 @@ search_tool = (
     ScaleSerpTool(
         name="search_tool",
         id="search_tool",
-        connection=ScaleSerp(api_key=scale_serp_api_key, params={"location": "USA, United Kingdom, Europe"}),
+        connection=ScaleSerp(
+            api_key=scale_serp_api_key,
+            params={"location": "USA, United Kingdom, Europe"},
+        ),
         limit=5,
         is_optimized_for_agents=True,
     )
@@ -121,12 +126,19 @@ agent_answer_synthesizer = (
         role=AGENT_ANSWER_ROLE,
         llm=llm,
     )
-    .inputs(search_results=search_tool.outputs.content, user_query=agent_query_rephraser.outputs.content)
+    .inputs(
+        search_results=search_tool.outputs.content,
+        user_query=agent_query_rephraser.outputs.content,
+    )
     .depends_on([search_tool, agent_query_rephraser])
 )
-agent_answer_synthesizer._prompt_variables.update({"search_results": "{search_results}", "user_query": "{user_query}"})
+agent_answer_synthesizer._prompt_variables.update(
+    {"search_results": "{search_results}", "user_query": "{user_query}"}
+)
 
-wf = Workflow(flow=Flow(nodes=[agent_query_rephraser, search_tool, agent_answer_synthesizer]))
+wf = Workflow(
+    flow=Flow(nodes=[agent_query_rephraser, search_tool, agent_answer_synthesizer])
+)
 
 
 def process_query(query: str):
@@ -144,7 +156,9 @@ def process_query(query: str):
         # Run the workflow with the provided query
         result = wf.run(input_data={"input": query}, config=None)
 
-        output_content = result.output[agent_answer_synthesizer.id]["output"].get("content")
+        output_content = result.output[agent_answer_synthesizer.id]["output"].get(
+            "content"
+        )
         logger.info(f"Workflow result: {output_content}")
 
         answer = extract_tag_content(output_content, "answer")

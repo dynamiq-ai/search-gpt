@@ -10,7 +10,6 @@ import os
 import re
 
 import requests
-
 from dynamiq.utils.logger import logger
 
 ENDPOINT = os.getenv("DYNAMIQ_ENDPOINT", "Your Dynamiq endpoint")
